@@ -65,6 +65,17 @@
 		);
 	}
 
+	/** Validates that a Roblox deep link URL has expected structure */
+	function isValidRobloxUrl(url: string): boolean {
+		try {
+			const parsed = new URL(url);
+			return (parsed.protocol === 'roblox:' || parsed.protocol === 'roblox-player:') &&
+				!url.includes("'") && !url.includes('"') && !url.includes('`') && !url.includes(';');
+		} catch {
+			return false;
+		}
+	}
+
 	/** Checks if the app is opened with a URI */
 	async function checkDeeplink() {
 		const urlArgument = window.NL_ARGS.find((arg) => arg.includes('--deeplink='));
@@ -80,11 +91,13 @@
 					break;
 			}
 		} else if (url.startsWith('roblox:') || url.startsWith('roblox-player:')) {
+			if (!isValidRobloxUrl(url)) {
+				console.error('[App] Rejected malformed deep link URL:', url);
+				return;
+			}
 			console.info('[App] Launching AppleBlox with Roblox URI.');
 			await focusWindow();
 			await launchRobloxWithHandlers(url);
-		}
-		if (urlArgument) {
 		}
 	}
 	checkDeeplink();
@@ -105,7 +118,9 @@
 
 			// @ts-expect-error
 			if ((event.target.href as string).includes('localhost')) return;
-			os.open(url);
+			if (url && (url.startsWith('https://') || url.startsWith('http://'))) {
+				os.open(url);
+			}
 		}
 	});
 

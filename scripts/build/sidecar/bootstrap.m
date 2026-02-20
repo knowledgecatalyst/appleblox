@@ -140,7 +140,7 @@
     NSMutableArray *taskArguments = [NSMutableArray arrayWithObjects:
                                      [NSString stringWithFormat:@"--path=%@", resourcesPath],
                                      @"--enable-extensions=true",
-                                     @"--window-enable-inspector=true",
+                                     @"--window-enable-inspector=false",
                                      nil];
     
     if (browserMode) {

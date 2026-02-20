@@ -14,7 +14,7 @@
 			e.preventDefault();
 			e.stopImmediatePropagation()
 			const href = target.getAttribute('href');
-			if (href) {
+			if (href && (href.startsWith('https://') || href.startsWith('http://'))) {
 				os.open(href);
 			}
 		}
