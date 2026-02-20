@@ -1,3 +1,4 @@
+import { filesystem } from '@neutralinojs/lib';
 import { shell, type ExecuteOptions } from './shell';
 
 /**
@@ -24,8 +25,8 @@ export async function remove(path: string, options: ExecuteOptions = {}): Promis
  * @param content - The content to write to the file.
  * @param options - Execution options.
  */
-export async function writeFile(path: string, content: string, options: ExecuteOptions = {}): Promise<void> {
-	await shell('bash', ['-c', `echo "${content.replace(/"/g, '\\"')}" > "${path}"`], options);
+export async function writeFile(path: string, content: string, _options: ExecuteOptions = {}): Promise<void> {
+	await filesystem.writeFile(path, content);
 }
 
 /**

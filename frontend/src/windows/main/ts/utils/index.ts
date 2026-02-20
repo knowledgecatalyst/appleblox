@@ -10,10 +10,13 @@ export async function isProcessAlive(pid: number | string) {
 }
 
 export async function curlGet(url: string): Promise<any> {
-	const res = JSON.parse(
-		(await shell('curl', ['-X', 'GET', '-H', 'Content-Type: application/json', url], { skipStderrCheck: true })).stdOut
-	);
-	return res;
+	const result = await shell('curl', ['-X', 'GET', '-H', 'Content-Type: application/json', '--max-time', '10', url], { skipStderrCheck: true });
+	try {
+		return JSON.parse(result.stdOut);
+	} catch {
+		console.error(`[curlGet] Failed to parse JSON response from ${url}`);
+		return {};
+	}
 }
 
 export function sleep(ms = 0) {

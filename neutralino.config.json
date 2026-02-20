@@ -12,7 +12,7 @@
 		"writeToLogFile": false,
 		"enabled": true
 	},
-	"tokenSecurity": "none",
+	"tokenSecurity": "one-time",
 	"modes": {
 		"window": {
 			"hidden": true,

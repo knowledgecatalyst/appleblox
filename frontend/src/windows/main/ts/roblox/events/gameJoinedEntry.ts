@@ -15,11 +15,20 @@ interface IPResponse {
 	readme: string;
 }
 
+/** Validate that a string is a valid IPv4 address */
+function isValidIPv4(ip: string): boolean {
+	return /^(\d{1,3}\.){3}\d{1,3}$/.test(ip) && ip.split('.').every((n) => parseInt(n) >= 0 && parseInt(n) <= 255);
+}
+
 async function gameJoinedEntry(data: GameEventInfo) {
 	// Add the join server button
 	const server = data.data.substring(10).split('|');
 	console.info(`[Activity] Current server: ${server[0]}, Port: ${server[1]}`);
 	if ((await getValue<boolean>('integrations.activity.notify_location')) === true) {
+		if (!isValidIPv4(server[0])) {
+			console.error(`[Activity] Invalid server IP address: ${server[0]}`);
+			return;
+		}
 		const ipReq: IPResponse = await curlGet(`https://ipinfo.io/${server[0]}/json`);
 		console.info(`[Activity] Server is located in "${ipReq.city}"`);
 

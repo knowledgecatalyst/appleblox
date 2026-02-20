@@ -1,4 +1,5 @@
 import beautify from 'json-beautify';
+import DOMPurify from 'dompurify';
 import path from 'path-browserify';
 import { toast } from 'svelte-sonner';
 import { getValue } from '../../components/settings';
@@ -110,7 +111,7 @@ export async function launchRoblox(
 				'Invalid flags in game profile(s)',
 				'You have one or several invalid flags in the following profiles:',
 				editorFlags.invalidProfileFlags
-					.map((profile) => `${profile.name.toUpperCase()}:\n ${beautify(profile.flags, null, 2, 100)}`)
+					.map((profile) => `${DOMPurify.sanitize(profile.name.toUpperCase())}:\n ${DOMPurify.sanitize(beautify(profile.flags, null, 2, 100))}`)
 					.join('<br><br>')
 			);
 			if (!isIgnored) {

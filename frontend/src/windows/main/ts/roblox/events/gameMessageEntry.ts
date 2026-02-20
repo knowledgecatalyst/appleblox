@@ -75,11 +75,15 @@ async function gameMessageEntry(messageData: GameEventInfo) {
 			};
 			if (data.smallImage) {
 				if (data.smallImage.hoverText) rpcOptions.smallImageText = data.smallImage.hoverText;
-				rpcOptions.smallImage = `https://assetdelivery.roblox.com/v1/asset/?id=${data.smallImage.assetId}`;
+				if (/^\d+$/.test(String(data.smallImage.assetId))) {
+					rpcOptions.smallImage = `https://assetdelivery.roblox.com/v1/asset/?id=${data.smallImage.assetId}`;
+				}
 			}
 			if (data.largeImage) {
 				if (data.largeImage.hoverText) rpcOptions.largeImage = data.largeImage.hoverText;
-				rpcOptions.largeImage = `https://assetdelivery.roblox.com/v1/asset/?id=${data.largeImage.assetId}`;
+				if (/^\d+$/.test(String(data.largeImage.assetId))) {
+					rpcOptions.largeImage = `https://assetdelivery.roblox.com/v1/asset/?id=${data.largeImage.assetId}`;
+				}
 			}
 			RPCController.set(rpcOptions);
 			break;

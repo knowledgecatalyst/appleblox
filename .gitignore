@@ -244,4 +244,13 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# Private keys and certificates
+*.key
+*.pem
+*.p12
+*.pfx
+*.cert
+*.cer
+*.crt
+
 # End of https://www.toptal.com/developers/gitignore/api/svelte,node,macos,windows,linux,git

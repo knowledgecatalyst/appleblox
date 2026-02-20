@@ -1,4 +1,5 @@
 import { $ } from 'bun';
+import { createHash } from 'node:crypto';
 import { chmodSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { Signale } from 'signale';
@@ -6,6 +7,20 @@ import { extract } from 'tar';
 
 const DRPC_RELEASE = 'https://github.com/AppleBlox/Discord-RPC-cli/releases/download/1.0.0/discord-rpc-cli';
 const ALERTER_RELEASE = 'https://github.com/vjeantet/alerter/releases/download/1.0.1/alerter_v1.0.1_darwin_amd64.zip';
+
+/** Verify SHA-256 hash of downloaded binary data */
+async function verifyIntegrity(data: ArrayBuffer | Blob, expectedHash: string, name: string): Promise<void> {
+	const buffer = data instanceof Blob ? Buffer.from(await data.arrayBuffer()) : Buffer.from(data);
+	const hash = createHash('sha256').update(buffer).digest('hex');
+	if (hash !== expectedHash) {
+		throw new Error(
+			`Integrity check failed for ${name}!\n` +
+			`Expected: ${expectedHash}\n` +
+			`Got:      ${hash}\n` +
+			`The downloaded binary may have been tampered with. Aborting.`
+		);
+	}
+}
 
 export async function buildSidecar() {
 	const logger = new Signale({ scope: 'sidecar' });
@@ -67,31 +82,39 @@ export async function buildSidecar() {
 	const drpcPath = resolve('bin/discordrpc_ablox');
 	if (!(await Bun.file(drpcPath).exists())) {
 		logger.info('Downloading DiscordRPC binary from repository releases...');
-		const file = await fetch(DRPC_RELEASE, {
-			method: 'GET',
-		})
-			.then((res) => res.blob())
-			.then((blob) => blob);
-		await Bun.write(drpcPath, file);
+		const blob = await fetch(DRPC_RELEASE, { method: 'GET' }).then((res) => {
+			if (!res.ok) throw new Error(`Failed to download DiscordRPC: HTTP ${res.status}`);
+			return res.blob();
+		});
+		// TODO: Replace with actual SHA-256 hash from a trusted first download
+		// Run: shasum -a 256 bin/discordrpc_ablox
+		// await verifyIntegrity(blob, 'POPULATE_WITH_ACTUAL_HASH', 'discordrpc_ablox');
+		logger.warn('Binary integrity verification is pending hash population for discordrpc_ablox');
+		await Bun.write(drpcPath, blob);
 		chmodSync(drpcPath, 0o755);
 		logger.complete('Downloaded discordrpc_ablox.');
 	}
 
 	if (!(await Bun.file(resolve('bin/alerter_ablox')).exists())) {
 		logger.info('Downloading Alerter binary from repository releases...');
-		const file = await fetch(ALERTER_RELEASE, {
-			method: 'GET',
-		})
-			.then((res) => res.arrayBuffer())
-			.then((arrayBuffer) => Buffer.from(arrayBuffer));
+		const arrayBuffer = await fetch(ALERTER_RELEASE, { method: 'GET' }).then((res) => {
+			if (!res.ok) throw new Error(`Failed to download Alerter: HTTP ${res.status}`);
+			return res.arrayBuffer();
+		});
+		// TODO: Replace with actual SHA-256 hash from a trusted first download
+		// Run: shasum -a 256 <downloaded-archive>
+		// await verifyIntegrity(arrayBuffer, 'POPULATE_WITH_ACTUAL_HASH', 'alerter');
+		logger.warn('Binary integrity verification is pending hash population for alerter');
+		const file = Buffer.from(arrayBuffer);
 
 		const zipPath = resolve('bin/.temp/alerter.tar.gz');
+		await $`mkdir -p ${resolve('bin/.temp')}`;
 		await Bun.write(zipPath, file);
 		await extract({
 			file: zipPath,
 			cwd: resolve('bin/'),
 		});
-		await $`mv bin/alerter bin/alerter_ablox"`;
+		await $`mv bin/alerter bin/alerter_ablox`;
 
 		logger.complete('Downloaded alerter_ablox.');
 	}
