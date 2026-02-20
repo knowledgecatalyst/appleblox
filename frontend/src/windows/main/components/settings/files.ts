@@ -26,6 +26,9 @@ if (!hasInterval) {
 const lastSaveTime = new Map<string, number>();
 /** Saves the settings of a panel by its ID. Can only save a panel once every 100ms */
 export async function saveSettings(panelId: string, data: Object): Promise<void> {
+	if (panelId.includes('/') || panelId.includes('\\') || panelId.includes('..')) {
+		throw new Error(`Invalid panelId: '${panelId}' contains path traversal characters.`);
+	}
 	const now = Date.now();
 	const lastSave = lastSaveTime.get(panelId);
 
@@ -54,6 +57,9 @@ export async function saveSettings(panelId: string, data: Object): Promise<void>
 
 /** Loads the data from the specified panelID */
 export async function loadSettings(panelId: string): Promise<{ [key: string]: any } | undefined> {
+	if (panelId.includes('/') || panelId.includes('\\') || panelId.includes('..')) {
+		throw new Error(`Invalid panelId: '${panelId}' contains path traversal characters.`);
+	}
 	try {
 		const filepath = `${await getConfigPath()}/${panelId}.json`;
 		if (!(await shellFS.exists(filepath))) {
@@ -66,11 +72,16 @@ export async function loadSettings(panelId: string): Promise<{ [key: string]: an
 }
 
 /** Set the value of a setting */
+const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
 export async function setValue(settingPath: `${string}.${string}.${string}`, value: any, createNew = false) {
 	const paths = settingPath.split('.');
 	const panelId = paths[0];
 	const categoryId = paths[1];
 	const widgetId = paths[2];
+	if (UNSAFE_KEYS.has(panelId) || UNSAFE_KEYS.has(categoryId) || UNSAFE_KEYS.has(widgetId)) {
+		throw new Error(`Invalid setting path: '${settingPath}' contains a reserved key.`);
+	}
 	let settings = await loadSettings(panelId);
 	if (!settings) {
 		if (createNew) {

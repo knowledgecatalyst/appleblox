@@ -24,7 +24,7 @@ export async function loadTheme() {
 			styleElement.id = 'theme-global-css';
 			document.head.appendChild(styleElement);
 		}
-		styleElement.innerHTML = cssContent;
+		styleElement.textContent = cssContent;
 	} catch (err) {
 		console.error("Couldn't load CSS theme:", err);
 	}

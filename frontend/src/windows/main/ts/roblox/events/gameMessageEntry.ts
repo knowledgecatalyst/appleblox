@@ -20,7 +20,7 @@ async function gameMessageEntry(messageData: GameEventInfo) {
 	if ((await getValue<boolean>('integrations.sdk.enabled')) !== true) return; // For now, game messages are only used for the SDK.
 
 	// Retrieve the message potential JSON
-	const json = messageData.data.match(/\{.*\}/);
+	const json = messageData.data.match(/\{.*?\}/);
 	if (!json) {
 		console.error("[Activity] Couldn't retrieve GameMessage json");
 		return;

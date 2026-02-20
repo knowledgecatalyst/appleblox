@@ -83,8 +83,12 @@ export class RobloxWindow {
 			windowData.w = scaleCoordinate(windowCache.w, 'x', screenSize);
 			windowData.h = scaleCoordinate(windowCache.x, 'y', screenSize);
 
-			// Write move data to relay file
-			const cmd = `echo '[{"appName":"Roblox","x":${windowCache.x},"y":${windowCache.y},"width":${windowCache.w},"height":${windowCache.h}}]' > ${pipeName} &`;
+			// Write move data to relay file (sanitize coordinates to integers to prevent injection)
+			const safeX = parseInt(String(windowCache.x), 10) || 0;
+			const safeY = parseInt(String(windowCache.y), 10) || 0;
+			const safeW = parseInt(String(windowCache.w), 10) || 0;
+			const safeH = parseInt(String(windowCache.h), 10) || 0;
+			const cmd = `echo '[{"appName":"Roblox","x":${safeX},"y":${safeY},"width":${safeW},"height":${safeH}}]' > ${pipeName} &`;
 			shell(cmd, [], { completeCommand: true });
 		} catch (err) {
 			console.error("[Roblox.Window] Couldn't modify window:", err);
