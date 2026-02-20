@@ -3,13 +3,24 @@
  * but Neutralino is honestly ##### me off so I decided I won't bother supporting this niche feature ;)
 */
 
-import { computer } from '@neutralinojs/lib';
+import { computer, os } from '@neutralinojs/lib';
 import { libraryPath } from '../libraries';
 import { shell, spawn, type SpawnEventEmitter } from '../tools/shell';
 import shellFS from '../tools/shellfs';
 import { sleep } from '../utils';
 
-const pipeName = '/tmp/window_relay_ablox';
+// Use a user-scoped runtime directory to avoid TOCTOU in world-writable /tmp
+let pipeName = '/tmp/window_relay_ablox';
+(async () => {
+	try {
+		const home = await os.getEnv('HOME');
+		const runtimeDir = `${home}/Library/Application Support/AppleBlox/.runtime`;
+		await shell('mkdir', ['-p', runtimeDir]);
+		pipeName = `${runtimeDir}/window_relay`;
+	} catch {
+		// Fall back to /tmp if we can't resolve the user directory
+	}
+})();
 let shouldRestartWindowManager = false;
 
 export interface WindowData {

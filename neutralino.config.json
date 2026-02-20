@@ -6,7 +6,20 @@
 	"url": "/",
 	"enableServer": true,
 	"enableNativeAPI": true,
-	"nativeAllowList": ["events.*", "os.*", "filesystem.*", "window.*", "clipboard.*", "computer.*","app.*"],
+	"nativeAllowList": [
+		"events.on", "events.off", "events.broadcast", "events.dispatch",
+		"os.execCommand", "os.spawnProcess", "os.updateSpawnedProcess",
+		"os.open", "os.getEnv", "os.getPath",
+		"os.showOpenDialog", "os.showFolderDialog",
+		"filesystem.readFile", "filesystem.writeFile", "filesystem.writeBinaryFile",
+		"filesystem.appendFile", "filesystem.createDirectory", "filesystem.readDirectory",
+		"filesystem.remove", "filesystem.copy", "filesystem.getStats",
+		"filesystem.createWatcher", "filesystem.removeWatcher",
+		"window.show",
+		"clipboard.writeText",
+		"computer.getOSInfo", "computer.getCPUInfo", "computer.getMemoryInfo", "computer.getDisplays",
+		"app.writeProcessOutput", "app.readProcessInput", "app.exit", "app.getConfig"
+	],
 	"exportAuthInfo": false,
 	"logging": {
 		"writeToLogFile": false,

@@ -13,7 +13,7 @@ export default defineConfig({
 		rollupOptions: {
 			external: ['/__neutralino_globals.js'],
 		},
-		sourcemap: true,
+		sourcemap: false,
 	},
 	resolve: {
 		alias: {

@@ -10,12 +10,29 @@ export async function createDirectory(path: string, options: ExecuteOptions = {}
 	await shell('mkdir', ['-p', path], options);
 }
 
+/** Safe base paths that rm -rf is allowed to operate within */
+const SAFE_REMOVE_PREFIXES = [
+	'/Library/Application Support/AppleBlox',
+	'/Applications/Roblox.app/Contents/',
+	'/tmp/',
+];
+
 /**
  * Removes the file or folder at the specified path.
+ * Validates the path is within expected directories to prevent accidental deletions.
  * @param path - The path of the file or folder to remove.
  * @param options - Execution options.
  */
 export async function remove(path: string, options: ExecuteOptions = {}): Promise<void> {
+	// Block path traversal sequences
+	if (path.includes('..')) {
+		throw new Error(`[shellFS.remove] Refusing to remove path containing '..': ${path}`);
+	}
+	// Ensure path is within an expected safe directory
+	const isSafe = SAFE_REMOVE_PREFIXES.some((prefix) => path.includes(prefix));
+	if (!isSafe) {
+		throw new Error(`[shellFS.remove] Refusing to remove path outside allowed directories: ${path}`);
+	}
 	await shell('rm', ['-rf', path], options);
 }
 
@@ -58,7 +75,7 @@ export async function move(source: string, dest: string, options: ExecuteOptions
  * @param options - Execution options.
  */
 export async function merge(source: string, dest: string, options: ExecuteOptions = {}): Promise<void> {
-	await shell('rsync', ['-a', source, dest], options);
+	await shell('rsync', ['-a', '--no-links', source, dest], options);
 }
 
 /**
